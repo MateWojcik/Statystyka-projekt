@@ -1,4 +1,0 @@
-"0","data <- read.csv(""Daegu_Real_Estate_data.csv"")"
-"2","Ostrzeżenie: cannot open file 'Daegu_Real_Estate_data.csv': No such file or directory"
-"2","Error in file(file, ""rt"") : cannot open the connection
-"

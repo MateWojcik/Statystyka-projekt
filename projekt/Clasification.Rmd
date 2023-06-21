@@ -105,7 +105,7 @@ Zmienna N_manager jest istotna.Niska wartość satystyki p daje nam wysoką grar
 Zmienna AptManageTypeself_management jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
 
 
-Modele addytywne GAM
+Modele addytywne GAM:
 ```{r}
 library(gam)
 ```
@@ -117,44 +117,22 @@ summary(fit_gam_bf)
 ```
 Znacznie lepsze wyniki od standarodwego modelu regresji logistycznej Dewiancja równa 0 i kryterium informayjnce AIC 83
 
+
 ```{r}
 par(mfrow = c(1, 3))
 plot(fit_gam_bf, col = "red", se = TRUE)
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-addytywne 
-```{r}
-
-fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5) + s(YrSold, df=5) + s(MonthSold, df=5) + s(Size.sqf., df=5) + s(Floor, df=5) + s( N_manager, df=5) + s(N_elevators, df=5) + s(  N_FacilitiesNearBy.Mall., df=5) + s(N_FacilitiesNearBy.Park., df=5) + s(N_SchoolNearBy.Elementary., df=5) + s(N_SchoolNearBy.University., df=5) + s(N_FacilitiesInApt, df=5) + s(  HeatingTypeindividual_heating, df=5) + s(AptManageTypeself_management, df=5) + s(SubwayStationBanwoldang ), data=data)
-summary(fit_gam_bf)
-```
 ```{r}
 library(tree)
 
 ```
+Zamiana na dane kategoryczne:
+```{r}
+Data$IS_elevator <- factor(Data$IS_elevator, levels = c(0, 1), labels = c("No", "Yes"))
+```
+
 ```{r}
 categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
 
@@ -207,37 +185,74 @@ formula
 ```
 
 ```{r}
-sales_high_tree <- tree(IS_elevator ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor + 
-    N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT + N_manager + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + 
-    N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + 
-    N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + 
-    N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + 
-    N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + 
-    `(Intercept)` + HallwayTypemixed + HallwayTypeterraced + 
-    HeatingTypeindividual_heating + AptManageTypeself_management + 
-    SubwayStationBanwoldang + `SubwayStationChil-sung-market` + 
-    SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital + 
-    `SubwayStationMyung-duk` + SubwayStationno_subway_nearby + 
-    `SubwayStationSin-nam` + `TimeToBusStop10min~15min` + `TimeToBusStop5min~10min` + 
-    `TimeToSubway10min~15min` + `TimeToSubway15min~20min` + `TimeToSubway5min~10min` + 
-    TimeToSubwayno_bus_stop_nearby, data = preprocessed_data)
-summary(sales_high_tree)
+# Split the data into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(preprocessed_data), 0.7 * nrow(preprocessed_data))
+train_data <- preprocessed_data[train_index, ]
+test_data <- preprocessed_data[-train_index, ]
 ```
-```{r}
-names(preprocessed_data)
 
+Drzewo decyzyjne:
+```{r}
+IS_elevator_tree <- tree(IS_elevator ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data)
+summary(IS_elevator_tree)
 ```
+
 
 ```{r}
-plot(sales_high_tree)
-text(sales_high_tree, pretty = 0)
+plot(IS_elevator_tree)
+text(IS_elevator_tree, pretty = 0)
+```
+```{r}
+print(IS_elevator_tree)
 ```
 
 
+```{r}
+library(tree)
+predictions <- predict(IS_elevator_tree, test_data, type = "class")
+confusionMatrix(predictions, test_data$IS_elevator)
+```
+Uzyskany model drzewa decyzyjnego użył do budowy drzewa tylko następujące zmienne:"N_SchoolNearBy.Middle.", "N_manager", N_Parkinglot.Ground.". I są to zmienne które są najbardziej istotne w klasyfikacji tego czy winda istnieje w budynku. 
+Uzyskane wyniki wskazują na idelane dopasowanie do danych, i bezbłędne rozpoznanie wszystkich klas w zbiorze testowym. Wynik ten jednak wydaje się być niemożliwym do uzyskania w rzeczywistiści. Upatrujemy przyczyne w zbiorze danych i być może zbyt małej ilości rekorów danych, rónież nie równym podziale w kategorii jest/nie ma windy. 
+
+Las losowy:
+```{r}
+install.packages("randomForest") # Install the package
+library(randomForest) # Load the package
+```
+
+```{r}
+# Train the random forest model
+rf_model <- randomForest(IS_elevator ~  YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data, ntree = 50, mtry = 6)
+```
+
+```{r}
+# Plot the error vs the number of trees graph
+plot(rf_model)
+```
 
 
+```{r}
+predictions <- predict(rf_model, test_data, type = "class")
 
+# Ocenianie dopasowania modelu
+confusion_matrix <- confusionMatrix(predictions, test_data$IS_elevator)
+accuracy <- confusion_matrix$overall['Accuracy']
+precision <- confusion_matrix$byClass['Precision']
+recall <- confusion_matrix$byClass['Recall']
+specificity <- confusion_matrix$byClass['Specificity']
+f1_score <- confusion_matrix$byClass['F1']
 
-
-
+# Wyświetlenie wyników
+print(confusion_matrix)
+cat(paste0("Accuracy: ", accuracy, "\n"))
+cat(paste0("Precision: ", precision, "\n"))
+cat(paste0("Recall: ", recall, "\n"))
+cat(paste0("Specificity: ", specificity, "\n"))
+cat(paste0("F1 Score: ", f1_score, "\n"))
+```
+Wyniki lasu losowego są takie podobne do pojedynczego drzewa. Idelane dopasowanie do danych, poprawne przewidzenie wszystkich przykłądów. Jak zostało wspomniane wcześniej, wynik taki wydaje się być zbyt idelany, uaptrujemy winy w danych, (zbyt mała ilość danych, zbyt duża dysproporcja w klasie (ilość) yes/no)
 
