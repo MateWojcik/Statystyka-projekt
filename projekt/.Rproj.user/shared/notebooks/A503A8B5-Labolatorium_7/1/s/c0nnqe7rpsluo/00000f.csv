@@ -1,0 +1,3 @@
+"0","fit_bs_knots <- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage)"
+"0","pred_bs_knots <- predict(fit_bs_knots, list(age = age_grid), se.fit = TRUE)"
+"0","plot(Wage$age, Wage$wage, cex = 0.5, col = ""darkgrey"")"

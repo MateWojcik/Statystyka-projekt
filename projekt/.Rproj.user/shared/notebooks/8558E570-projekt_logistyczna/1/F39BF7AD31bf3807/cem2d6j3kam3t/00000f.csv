@@ -1,0 +1,2 @@
+"0","names(Data)[names(Data) == ""N_elevators""] <- ""IS_elevator"""
+"0","Data$IS_elevator <- ifelse(Data$IS_elevator > 0, 1, 0)"

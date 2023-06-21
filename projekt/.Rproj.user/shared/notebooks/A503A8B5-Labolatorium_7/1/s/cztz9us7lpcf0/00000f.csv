@@ -1,0 +1,3 @@
+"0","fit_smooth_cv <- smooth.spline(Wage$age, Wage$wage, cv = TRUE)"
+"2","Ostrzeżenie: krzyżowa walidacja z nieunikalnymi wartościami 'x' wydaje się wątpliwa"
+"0","plot(Wage$age, Wage$wage, cex = 0.5, col = ""darkgrey"")"

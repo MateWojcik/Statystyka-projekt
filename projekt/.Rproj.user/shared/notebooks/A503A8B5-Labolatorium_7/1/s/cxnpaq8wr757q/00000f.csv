@@ -1,0 +1,3 @@
+"0","fit_ns <- lm(wage ~ ns(age, df = 4), data = Wage)"
+"0","pred_ns <- predict(fit_ns, list(age = age_grid), se.fit = TRUE)"
+"0","plot(Wage$age, Wage$wage, cex = 0.5, col = ""darkgrey"")"

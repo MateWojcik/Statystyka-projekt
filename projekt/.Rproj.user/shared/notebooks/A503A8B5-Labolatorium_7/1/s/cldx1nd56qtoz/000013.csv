@@ -1,0 +1,2 @@
+"0","lines(age_grid, pred_bs_df$fit + 2 * pred_bs_df$se.fit, col = ""red"","
+"0","      lty = ""dashed"")"

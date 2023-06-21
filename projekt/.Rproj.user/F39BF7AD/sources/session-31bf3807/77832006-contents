@@ -1,0 +1,304 @@
+wczytanie
+
+```{r}
+data <- read.csv("Daegu_Real_Estate_data.csv")
+data
+```
+
+formuła
+
+```{r}
+add_backticks = function(x) {
+    paste0("`", x, "`")
+}
+
+x_lm_formula = function(x) {
+    paste(add_backticks(x), collapse = " + ")
+}
+
+build_lm_formula = function(x, y){
+    if (length(y)>1){
+        stop("y jest różne od 1")
+    }
+    as.formula(        
+        paste0("`",y,"`", " ~ ", x_lm_formula(x))
+    )
+}
+
+
+get_lm_formula <- function(data) {
+  columns <- colnames(data)
+  
+  y_cols <- columns[1]
+  x_cols <- columns[2:length(columns)]
+  
+  formula <- build_lm_formula(x_cols, y_cols)
+  
+  return(formula)
+}
+
+
+
+formula <- get_lm_formula(data)
+formula
+
+```
+
+model
+
+```{r}
+
+# Run Model
+model <- lm(formula = formula, data = data)
+
+
+summary(model)
+```
+
+Niska wartość satystyki p sugeuje nam, że zmienna HeatingTypeindividual_heating jest statystcznie istotna. Współczynnik jest ujemny a więc zmniejsza przewidywaną cenę sprzedaży mieszkania.
+
+Wysoka wartość satystyki p sugeruje, że zmienna SubwayStationChil-sung-market jest nieistotna. Współczynnik jest ujemny a więc zmniejsza przewidywaną cenę sprzedaży mieszkania.
+
+```{r}
+
+
+
+categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
+
+
+dummy_data <- model.matrix(~., data = data[, categorical_vars])
+
+
+preprocessed_data <- cbind(data[, -which(names(data) %in% categorical_vars)], dummy_data)
+
+
+print(preprocessed_data)
+
+
+```
+
+```{r}
+
+
+
+formula <- get_lm_formula(preprocessed_data)
+formula
+
+# Run Model
+model <- lm(formula = formula, data = preprocessed_data)
+
+
+summary(model)
+
+
+```
+
+```{R}
+
+
+# Summary statistics for numeric variables
+numeric_vars <- sapply(data, is.numeric)
+summary_stats <- summary(data[, numeric_vars])
+print(summary_stats)
+
+# Frequency table for categorical variables
+categorical_vars <- sapply(data, is.factor)
+frequency_table <- sapply(data[, categorical_vars], table)
+print(frequency_table)
+
+
+```
+
+```{r}
+
+
+
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+
+
+#90 + wywalić
+```
+
+------------------------------------------------------------------------
+
+nowy model- redeukcja v1
+
+```{R}
+reduced_form <- "SalePrice ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor + N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT + N_manager + N_elevators +  N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.University. + N_FacilitiesInApt +   HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + `SubwayStationChil-sung-market` "
+
+
+# Run Model
+model <- lm(formula = reduced_form, data = preprocessed_data)
+
+
+summary(model)
+
+
+```
+
+badanie korelacji
+
+```{r}
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+
+
+```
+
+redukcja po vif
+
+```{R}
+reduced_form <- "SalePrice ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor +  N_manager + N_elevators +   N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.University. + N_FacilitiesInApt +   HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang "
+
+
+# Run Model
+model <- lm(formula = reduced_form, data = preprocessed_data)
+
+
+summary(model)
+
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+```
+
+
+
+addytywne 
+```{r}
+
+fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5),data=data)
+summary(fit_gam_bf)
+```
+
+
+
+```{r}
+
+
+fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5) + s(YrSold, df=5) + s(MonthSold, df=5) + s(Size.sqf., df=5) + s(Floor, df=5) + s( N_manager, df=5) + s(N_elevators, df=5) + s(  N_FacilitiesNearBy.Mall., df=5) + s(N_FacilitiesNearBy.Park., df=5) + s(N_SchoolNearBy.Elementary., df=5) + s(N_SchoolNearBy.University., df=5) + s(N_FacilitiesInApt, df=5) + s(  HeatingTypeindividual_heating, df=5) + s(AptManageTypeself_management, df=5) + s(SubwayStationBanwoldang ), data=data)
+summary(fit_gam_bf)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

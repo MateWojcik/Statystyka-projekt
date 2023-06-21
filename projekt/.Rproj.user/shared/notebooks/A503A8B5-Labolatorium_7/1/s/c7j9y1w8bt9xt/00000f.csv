@@ -1,0 +1,2 @@
+"0","fit_smooth_df <- smooth.spline(Wage$age, Wage$wage, df = 16)"
+"0","plot(Wage$age, Wage$wage, cex = 0.5, col = ""darkgrey"")"

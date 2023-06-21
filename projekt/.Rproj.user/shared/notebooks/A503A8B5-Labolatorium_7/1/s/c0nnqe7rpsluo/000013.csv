@@ -1,0 +1,2 @@
+"0","lines(age_grid, pred_bs_knots$fit + 2 * pred_bs_knots$se.fit, col = ""red"","
+"0","      lty = ""dashed"")"

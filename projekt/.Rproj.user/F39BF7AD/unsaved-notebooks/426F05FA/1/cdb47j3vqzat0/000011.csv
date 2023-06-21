@@ -1,0 +1,4 @@
+"0","fit_gam_ls <- lm(wage ~ ns(year, df = 4) + ns(age, df = 5) + education,"
+"0","                 data = Wage)"
+"2","Error in ns(year, df = 4) : could not find function ""ns""
+"

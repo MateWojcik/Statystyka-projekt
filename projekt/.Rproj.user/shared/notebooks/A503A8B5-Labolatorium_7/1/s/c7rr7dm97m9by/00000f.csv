@@ -1,0 +1,6 @@
+"0","age_lims <- range(Wage$age)"
+"0","age_grid <- seq(age_lims[1], age_lims[2])"
+"0","pred_poly <- predict(fit_poly, list(age = age_grid), se.fit = TRUE)"
+"0","se_bands <- cbind(pred_poly$fit + 2 * pred_poly$se.fit, "
+"0","                  pred_poly$fit - 2 * pred_poly$se.fit)"
+"0","plot(Wage$age, Wage$wage, col = ""darkgrey"", cex = 0.5, xlim = age_lims)"

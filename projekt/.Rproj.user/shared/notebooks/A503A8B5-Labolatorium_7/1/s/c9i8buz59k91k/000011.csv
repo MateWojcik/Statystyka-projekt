@@ -1,0 +1,5 @@
+"0","for (i in 1:length(spans)) {"
+"0","   fit_loess <- loess(wage ~ age, span = spans[i], degree = 1, data = Wage)"
+"0","   pred_loess <- predict(fit_loess, data.frame(age = age_grid))"
+"0","   lines(age_grid, pred_loess, col = clrs[i], lwd = 2)"
+"0","}"

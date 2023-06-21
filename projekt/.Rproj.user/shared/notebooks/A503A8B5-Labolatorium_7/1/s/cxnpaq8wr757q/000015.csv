@@ -1,0 +1,2 @@
+"0","lines(age_grid, pred_ns$fit - 2 * pred_ns$se.fit, col = ""red"","
+"0","      lty = ""dashed"")"

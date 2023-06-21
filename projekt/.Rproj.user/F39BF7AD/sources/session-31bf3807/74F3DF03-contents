@@ -1,0 +1,334 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Reading dataset:
+```{r}
+Data <- read.csv("Daegu_Real_Estate_data.csv")
+Data
+```
+Cleaning:
+```{r}
+dim(Data)
+Data <- na.omit(Data)
+dim(Data)
+```
+
+
+ column N_elevators to binary value IS_elevator:
+```{r}
+names(Data)[names(Data) == "N_elevators"] <- "IS_elevator"
+Data$IS_elevator <- ifelse(Data$IS_elevator > 0, 1, 0)
+```
+
+
+
+Now we can use Is_elevator column to build logistic regression model:
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ . - IS_elevator, 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+
+
+Z racji na niezbierzność modelu podczas budowy modelu ze wszystkimi zmiennymi, proces selekcji został przeprowadzony ręcznie zgodnie z przypuszczeniami autora co do przydatnosci i istotności danych zmiennych w modelu.
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + Floor + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement., 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+Model został zbudowany po 11 iteracjach. 
+
+Zmienna YearBuilt jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna SalePrice jest istotna.  Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna Floor jest nie istotna - można ją wykluczyć z modelu. 
+
+Zmienna N_APT jest istona.  Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_SchoolNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodani a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_FacilitiesNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_Parkinglot.Ground. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_Parkinglot.Basement. jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Analiza dewiancji modelu pokazuje, że model znacząco różni się od modelu zerowego co jest porządanym rezultatem. Pdobne wnioski można wyciagnąć z porówania wyniku kryterium AIC z modelem zerowym. 
+
+
+
+Model bez zmiennej Floor:
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement., 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+Po usunięciu zmiennej Krytermiu AIC oraz dewiancja podobna choć nieznacznie większa.
+
+
+Dodanie zmiennych do modelu:
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement. + N_manager + AptManageType, 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+Końcowo metodą prób i błędów udało się uzyskać model lepszy od poprzeniego (niższa wartość kryterium AIC oraz niższa wartość dewiancji)
+
+Analiza wyników:
+
+Zmienna YearBuilt jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna SalePrice jest istotna.  Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+
+Zmienna N_APT jest istona.  Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_SchoolNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodani a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_FacilitiesNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_Parkinglot.Ground. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie. 
+
+Zmienna N_Parkinglot.Basement. jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_manager jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmniejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna AptManageTypeself_management jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+
+Modele addytywne GAM
+```{r}
+library(gam)
+```
+```{r}
+fit_gam_bf <- gam(IS_elevator ~ s(YearBuilt, df = 5) + s(SalePrice, df = 5) + s(N_APT, df = 5) + s(N_SchoolNearBy.Total., df = 5) + 
+    s(N_FacilitiesNearBy.Total., df = 5) + s(N_Parkinglot.Ground., df = 5) + s(N_Parkinglot.Basement., df = 5) + 
+    s(N_manager, df = 5) + AptManageType, family = binomial(), data = Data)
+summary(fit_gam_bf)
+```
+Znacznie lepsze wyniki od standarodwego modelu regresji logistycznej Dewiancja równa 0 i kryterium informayjnce AIC 83
+
+```{r}
+par(mfrow = c(1, 3))
+plot(fit_gam_bf, col = "red", se = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Install the required package for function
+install.packages("randomForest")
+
+# Load the library
+library(randomForest)
+```
+
+
+```{r}
+
+
+# Split the data into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(preprocessed_data), 0.7 * nrow(preprocessed_data))
+train_data <- preprocessed_data[train_index, ]
+test_data <- preprocessed_data[-train_index, ]
+
+# Train the random forest model
+rf_model <- randomForest(SalePrice ~ IS_elevator + YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data, ntree = 50, mtry = 6)
+
+
+```
+
+```{r}
+print(rf_model)
+```
+
+
+```{r}
+# Output to be present as PNG file 
+png(file = "randomForestRegression.png")
+  
+# Plot the error vs the number of trees graph
+plot(rf_model)
+  
+# Saving the file
+dev.off()
+```
+```{r}
+plot(rf_model)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+addytywne 
+```{r}
+
+fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5) + s(YrSold, df=5) + s(MonthSold, df=5) + s(Size.sqf., df=5) + s(Floor, df=5) + s( N_manager, df=5) + s(N_elevators, df=5) + s(  N_FacilitiesNearBy.Mall., df=5) + s(N_FacilitiesNearBy.Park., df=5) + s(N_SchoolNearBy.Elementary., df=5) + s(N_SchoolNearBy.University., df=5) + s(N_FacilitiesInApt, df=5) + s(  HeatingTypeindividual_heating, df=5) + s(AptManageTypeself_management, df=5) + s(SubwayStationBanwoldang ), data=data)
+summary(fit_gam_bf)
+```
+```{r}
+library(tree)
+
+```
+```{r}
+categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
+
+
+dummy_data <- model.matrix(~., data = Data[, categorical_vars])
+
+
+preprocessed_data <- cbind(Data[, -which(names(Data) %in% categorical_vars)], dummy_data)
+
+
+print(preprocessed_data)
+```
+formuła
+
+```{r}
+add_backticks = function(x) {
+    paste0("`", x, "`")
+}
+
+x_lm_formula = function(x) {
+    paste(add_backticks(x), collapse = " + ")
+}
+
+build_lm_formula = function(x, y){
+    if (length(y)>1){
+        stop("y jest różne od 1")
+    }
+    as.formula(        
+        paste0("`",y,"`", " ~ ", x_lm_formula(x))
+    )
+}
+
+
+get_lm_formula <- function(data) {
+  columns <- colnames(data)
+  
+  y_cols <- columns[1]
+  x_cols <- columns[2:length(columns)]
+  
+  formula <- build_lm_formula(x_cols, y_cols)
+  
+  return(formula)
+}
+
+
+
+formula <- get_lm_formula(preprocessed_data)
+formula
+
+```
+
+```{r}
+sales_high_tree <- tree(IS_elevator ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor + 
+    N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT + N_manager + 
+    IS_elevator + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + 
+    N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + 
+    N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + 
+    N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + 
+    N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + 
+    `(Intercept)` + HallwayTypemixed + HallwayTypeterraced + 
+    HeatingTypeindividual_heating + AptManageTypeself_management + 
+    SubwayStationBanwoldang + `SubwayStationChil-sung-market` + 
+    SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital + 
+    `SubwayStationMyung-duk` + SubwayStationno_subway_nearby + 
+    `SubwayStationSin-nam` + `TimeToBusStop10min~15min` + `TimeToBusStop5min~10min` + 
+    `TimeToSubway10min~15min` + `TimeToSubway15min~20min` + `TimeToSubway5min~10min` + 
+    TimeToSubwayno_bus_stop_nearby, data = preprocessed_data)
+summary(sales_high_tree)
+```
+```{r}
+names(Data)
+
+```
+
+```{r}
+plot(sales_high_tree)
+text(sales_high_tree, pretty = 0)
+```
+
+
+
+
+
+
+
+
+

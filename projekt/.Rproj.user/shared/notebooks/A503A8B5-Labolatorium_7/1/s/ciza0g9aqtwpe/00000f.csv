@@ -1,0 +1,5 @@
+"0","fit_step <- lm(wage ~ cut(age, 4), data = Wage)"
+"0","pred_step <- predict(fit_step, list(age = age_grid), se.fit = TRUE)"
+"0","se_bands <- cbind(pred_step$fit + 2 * pred_step$se.fit, "
+"0","                  pred_step$fit - 2 * pred_step$se.fit)"
+"0","plot(Wage$age, Wage$wage, col = ""darkgrey"", cex = 0.5, xlim = age_lims)"

@@ -1,0 +1,30 @@
+"0","# Install the required package for function"
+"0","install.packages(""randomForest"")"
+"2","Instalowanie pakietu w ‘C:/Users/szcze/AppData/Local/R/win-library/4.3’
+(ponieważ ‘lib’ nie jest określony)
+"
+"2","trying URL 'https://cran.rstudio.com/bin/windows/contrib/4.3/randomForest_4.7-1.1.zip'
+"
+"2","Content type 'application/zip'"
+"2"," length 222242 bytes (217 KB)
+"
+"2","downloaded 217 KB
+
+"
+"1","pakiet ‘randomForest’ został pomyślnie rozpakowany oraz sumy MD5 zostały sprawdzone
+"
+"1","
+"
+"1",""
+"1","Pobrane pakiety binarne są w
+	C:\Users\szcze\AppData\Local\Temp\RtmpoVZADQ\downloaded_packages"
+"1",""
+"1","
+"
+"0","# Load the library"
+"0","library(randomForest)"
+"2","Ostrzeżenie: pakiet ‘randomForest’ został zbudowany w wersji R 4.3.1"
+"2","randomForest 4.7-1.1
+"
+"2","Type rfNews() to see new features/changes/bug fixes.
+"

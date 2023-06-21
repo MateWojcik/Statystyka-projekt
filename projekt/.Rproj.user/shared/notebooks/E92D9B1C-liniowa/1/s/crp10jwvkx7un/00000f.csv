@@ -1,0 +1,8 @@
+"0","# Set the file path of the CSV file"
+"0","file_path <- ""M:/Studia/stat/Daegu_Real_Estate_data.csv"""
+"0",""
+"0","# Read the CSV file"
+"0","data <- read.csv(file_path)"
+"2","Ostrzeżenie: cannot open file 'M:/Studia/stat/Daegu_Real_Estate_data.csv': No such file or directory"
+"2","Error in file(file, ""rt"") : cannot open the connection
+"

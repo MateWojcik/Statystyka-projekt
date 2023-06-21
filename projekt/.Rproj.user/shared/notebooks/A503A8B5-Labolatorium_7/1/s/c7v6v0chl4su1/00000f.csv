@@ -1,0 +1,1 @@
+"0","fit_log_poly <- glm(I(wage > 250) ~ poly(age, 4), data = Wage, family = binomial)"

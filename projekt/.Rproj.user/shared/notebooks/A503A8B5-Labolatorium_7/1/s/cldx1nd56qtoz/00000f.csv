@@ -1,0 +1,3 @@
+"0","fit_bs_df <- lm(wage ~ bs(age, df = 6), data = Wage)"
+"0","pred_bs_df <- predict(fit_bs_df, list(age = age_grid), se.fit = TRUE)"
+"0","plot(Wage$age, Wage$wage, cex = 0.5, col = ""darkgrey"")"

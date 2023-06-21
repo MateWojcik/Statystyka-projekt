@@ -1,0 +1,2 @@
+"0","bs_knots <- attr(bs(Wage$age, df = 6), ""knots"")"
+"0","abline(v = bs_knots, lty = ""dotted"")"

@@ -1,0 +1,7 @@
+"0","pred_log_poly <- predict(fit_log_poly, list(age = age_grid), se.fit = TRUE)"
+"0","pred_probs <- plogis(pred_log_poly$fit)"
+"0","se_bands_logit <- cbind(pred_log_poly$fit + 2 * pred_log_poly$se.fit,"
+"0","                        pred_log_poly$fit - 2 * pred_log_poly$se.fit)"
+"0","se_bands <- plogis(se_bands_logit)"
+"0","plot(Wage$age, I(Wage$wage > 250), xlim = age_lims, ylim = c(0, 1), "
+"0","     col = ""darkgrey"", cex = 0.5, ylab = ""P(wage > 250 | age)"")"

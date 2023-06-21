@@ -1,0 +1,4 @@
+"0",""
+"0","fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5) + s(YrSold, df=5) + s(MonthSold, df=5) + s(Size.sqf., df=5) + s(Floor, df=5) + s( N_manager, df=5) + s(N_elevators, df=5) + s(  N_FacilitiesNearBy.Mall., df=5) + s(N_FacilitiesNearBy.Park., df=5) + s(N_SchoolNearBy.Elementary., df=5) + s(N_SchoolNearBy.University., df=5) + s(N_FacilitiesInApt, df=5) + s(  HeatingTypeindividual_heating, df=5) + s(AptManageTypeself_management, df=5) + s(SubwayStationBanwoldang ), data=data)"
+"2","Error in eval(predvars, data, env) : object 'N_elevators' not found
+"
