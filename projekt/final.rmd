@@ -1,0 +1,751 @@
+wczytanie danych
+
+```{r}
+# Set the file path of the CSV file
+file_path <- "M:/Studia/stat/Daegu_Real_Estate_data.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Print the contents of the data
+print(data)
+
+
+
+```
+
+formuła
+
+```{r}
+add_backticks = function(x) {
+    paste0("`", x, "`")
+}
+
+x_lm_formula = function(x) {
+    paste(add_backticks(x), collapse = " + ")
+}
+
+build_lm_formula = function(x, y){
+    if (length(y)>1){
+        stop("y jest różne od 1")
+    }
+    as.formula(        
+        paste0("`",y,"`", " ~ ", x_lm_formula(x))
+    )
+}
+
+
+get_lm_formula <- function(data) {
+  columns <- colnames(data)
+  
+  y_cols <- columns[1]
+  x_cols <- columns[2:length(columns)]
+  
+  formula <- build_lm_formula(x_cols, y_cols)
+  
+  return(formula)
+}
+
+
+
+formula <- get_lm_formula(data)
+formula
+
+```
+
+model
+
+```{r}
+
+# Run Model
+model <- lm(formula = formula, data = data)
+
+
+summary(model)
+```
+
+Niska wartość satystyki p sugeuje nam, że zmienna HeatingTypeindividual_heating jest statystcznie istotna. Współczynnik jest ujemny a więc zmniejsza przewidywaną cenę sprzedaży mieszkania.
+
+Wysoka wartość satystyki p sugeruje, że zmienna SubwayStationChil-sung-market jest nieistotna. Współczynnik jest ujemny a więc zmniejsza przewidywaną cenę sprzedaży mieszkania.
+
+```{r}
+
+
+
+categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
+
+
+dummy_data <- model.matrix(~., data = data[, categorical_vars])
+
+
+preprocessed_data <- cbind(data[, -which(names(data) %in% categorical_vars)], dummy_data)
+
+
+print(preprocessed_data)
+
+
+```
+
+```{r}
+
+
+
+formula <- get_lm_formula(preprocessed_data)
+formula
+
+# Run Model
+model <- lm(formula = formula, data = preprocessed_data)
+
+
+summary(model)
+
+
+```
+
+```{R}
+
+
+# Summary statistics for numeric variables
+numeric_vars <- sapply(data, is.numeric)
+summary_stats <- summary(data[, numeric_vars])
+print(summary_stats)
+
+# Frequency table for categorical variables
+categorical_vars <- sapply(data, is.factor)
+frequency_table <- sapply(data[, categorical_vars], table)
+print(frequency_table)
+
+
+```
+
+redukcja korelacji za pomocą vif-a
+
+```{r}
+
+
+
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+
+
+#
+```
+
+------------------------------------------------------------------------
+
+nowy model- redeukcja v1
+
+```{R}
+reduced_form <- "SalePrice ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor + N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT + N_manager +   N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.University. + N_FacilitiesInApt +   HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + `SubwayStationChil-sung-market` "
+
+
+# Run Model
+model <- lm(formula = reduced_form, data = preprocessed_data)
+
+
+summary(model)
+
+
+```
+
+badanie korelacji
+
+```{r}
+
+
+
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+
+
+```
+
+redukcja po vif
+
+```{R}
+reduced_form <- "SalePrice ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor +  N_manager +    N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.University. + N_FacilitiesInApt +   HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang "
+
+
+# Run Model
+model <- lm(formula = reduced_form, data = preprocessed_data)
+
+
+summary(model)
+
+# Print the coefficients
+print(coefficients(model))
+
+# Check the statistical significance of coefficients
+print(summary(model)$coefficients)
+
+# Calculate the R-squared value
+rsquared <- summary(model)$r.squared
+print(paste("R-squared:", rsquared))
+
+# Check for multicollinearity using Variance Inflation Factor (VIF)
+library(car)
+viff <- car::vif(model)
+print("Variance Inflation Factor (VIF):")
+print(viff)
+
+# Check for heteroscedasticity using residuals
+residuals <- residuals(model)
+plot(residuals ~ fitted(model), main = "Residuals vs. Fitted Values")
+```
+
+---
+title: "Tree"
+output: html_notebook
+---
+
+```         
+```
+
+Cleaning:
+
+```{r}
+dim(Data)
+Data <- na.omit(Data)
+dim(Data)
+
+```
+
+```{r}
+names(Data)[names(Data) == "N_elevators"] <- "IS_elevator"
+Data$IS_elevator <- ifelse(Data$IS_elevator > 0, 1, 0)
+```
+
+```{r}
+library(tree)
+
+```
+
+```{r}
+categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
+
+
+dummy_data <- model.matrix(~., data = Data[, categorical_vars])
+
+
+preprocessed_data <- cbind(Data[, -which(names(Data) %in% categorical_vars)], dummy_data)
+
+
+print(preprocessed_data)
+```
+
+```{r}
+add_backticks = function(x) {
+    paste0("`", x, "`")
+}
+
+x_lm_formula = function(x) {
+    paste(add_backticks(x), collapse = " + ")
+}
+
+build_lm_formula = function(x, y){
+    if (length(y)>1){
+        stop("y jest różne od 1")
+    }
+    as.formula(        
+        paste0("`",y,"`", " ~ ", x_lm_formula(x))
+    )
+}
+
+
+get_lm_formula <- function(data) {
+  columns <- colnames(data)
+  
+  y_cols <- columns[1]
+  x_cols <- columns[2:length(columns)]
+  
+  formula <- build_lm_formula(x_cols, y_cols)
+  
+  return(formula)
+}
+
+
+
+formula <- get_lm_formula(preprocessed_data)
+formula
+
+```
+
+tworzenie drzewa losowego
+
+```{r}
+sales_high_tree <- tree(SalePrice ~ IS_elevator + YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby ,data = preprocessed_data)
+summary(sales_high_tree)
+```
+
+```{r}
+names(preprocessed_data)
+```
+
+wizualizacja drzewa
+
+```{r}
+
+
+plot(sales_high_tree)
+text(sales_high_tree, pretty = 0, cex = 0.5)
+```
+
+drzewo ma 14 węzłów, a wysoka wartość średniego błędu rezydualnego wskazuje, że słabo opisuje ono dane.
+
+generowanie lasu losowego
+
+```{r}
+n <- nrow(preprocessed_data)
+train <- sample(n, n / 2)
+test <- -train
+```
+
+```{r}
+install.packages("randomForest")
+library(randomForest)
+```
+
+```{r}
+
+
+
+
+# Split the data into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(preprocessed_data), 0.7 * nrow(preprocessed_data))
+train_data <- preprocessed_data[train_index, ]
+test_data <- preprocessed_data[-train_index, ]
+
+# Train the random forest model
+rf_model <- randomForest(SalePrice ~ IS_elevator + YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data, ntree = 10, mtry = 3)
+
+# Make predictions on the test data
+predictions <- predict(rf_model, test_data)
+```
+
+```{r}
+
+
+
+# Visualize variable importance
+print(rf_model)
+
+# Create a scatter plot of predicted vs. actual values
+plot(predictions, test_data$SalePrice, main = "Random Forest: Predicted vs. Actual", xlab = "Predicted SalePrice", ylab = "Actual SalePrice")
+
+# Add a diagonal reference line
+abline(0, 1, col = "red")
+
+# Add a legend
+legend("topleft", legend = c("Predicted vs. Actual"), col = c("black"), lty = c(1))
+```
+
+```{r}
+
+# Make predictions on the test data
+predictions <- as.numeric(as.character(predictions))
+actual_values <- as.numeric(as.character(test_data$SalePrice))
+
+# Calculate the mean squared error (MSE)
+mse <- mean((predictions - actual_values)^2)
+mse
+```
+
+podobnie jak drzewo losowe, tak i las słabo opsuje dane, wyniak to z wysokiej wartości MSE oraz estymowanego błędu.
+
+wczytanie
+
+```{r}
+# Set the file path of the CSV file
+file_path <- "M:/Studia/stat/Daegu_Real_Estate_data.csv"
+
+# Read the CSV file
+data <- read.csv(file_path)
+
+# Print the contents of the data
+print(data)
+```
+
+```{r}
+
+
+X <- model.matrix(SalePrice ~ ., data = data)[, -1]
+y <- data$SalePrice
+```
+
+```{r}
+library(glmnet)
+
+lambda_grid <- 10^seq(10, -2, length.out = 100)
+fit_ridge <- glmnet(X, y, alpha = 0, lambda = lambda_grid)
+
+
+
+set.seed(1)
+n <- nrow(X)
+train <- sample(n, n / 2)
+test <- -train
+fit_ridge <- glmnet(X[train,], y[train], alpha = 0, lambda = lambda_grid,
+                    thresh = 1e-12)
+
+
+```
+
+```{r}
+fit_lasso <- glmnet(X[train,], y[train], alpha = 1)
+plot(fit_lasso, xvar = "lambda")
+```
+
+```{r}
+
+cv_out <- cv.glmnet(X[train,], y[train], alpha = 1)
+plot(cv_out)
+cv_out$lambda.min
+pred_lasso <- predict(fit_lasso, s = cv_out$lambda.min, newx = X[test,])
+mean((pred_lasso - y[test])^2)
+```
+
+```{r}
+install.packages("glmnet")
+library(glmnet)
+```
+
+fit_lasso_full \<- glmnet(X, y, alpha = 1) predict(fit_lasso_full, s = cv_out\$lambda.min, type = "coefficients")
+
+Na podstawie tabeli można ocenić, które zmienne mają istotny wpływ na zmienną zależną w modelu regresji i jakie jest kierunkowe oddziaływanie tych zmiennych na wynik. Zmienne obok których jest ".", możemy odrzucić jako statystycznie nieistotne, a np. Najsilniejszy dodatni wpływ na tem model ma zmienna "TimeToSubway10min\~15min",
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Reading dataset:
+```{r}
+Data <- read.csv("Daegu_Real_Estate_data.csv")
+Data
+```
+Cleaning:
+
+```{r}
+dim(Data)
+Data <- na.omit(Data)
+dim(Data)
+```
+
+Modele addytywne GAM
+
+```{r}
+library(gam)
+```
+
+```{r}
+fit_gam_bf <- gam(SalePrice ~ s(YearBuilt, df=5) + s(YrSold, df=5) + s(MonthSold, df=5) + s(Size.sqf., df=5) + s(Floor, df=5) + s(N_manager, df=5) + s(N_SchoolNearBy.Elementary., df=5) + s(N_SchoolNearBy.University., df=5) + s(N_FacilitiesInApt, df=5) + HeatingType + AptManageType + SubwayStation, data=data)
+summary(fit_gam_bf)
+```
+
+```{r}
+fit_gam_ls <- lm(SalePrice ~ ns(YearBuilt, df=5) + ns(YrSold, df=5) + ns(MonthSold, df=5) + ns(Size.sqf., df=5) + ns(Floor, df=5) + ns(N_manager, df=5) + ns(N_SchoolNearBy.Elementary., df=3) + ns(N_SchoolNearBy.University., df=3) + ns(N_FacilitiesInApt, df=3) + HeatingType + AptManageType + SubwayStation, data=data)
+fit_gam_ls
+```
+
+```{r}
+summary(fit_gam_ls)
+```
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Cleaning:
+
+```{r}
+dim(Data)
+Data <- na.omit(Data)
+dim(Data)
+```
+
+KLASYFIKACJA:
+
+column N_elevators to binary value IS_elevator:
+
+```{r}
+names(Data)[names(Data) == "N_elevators"] <- "IS_elevator"
+Data$IS_elevator <- ifelse(Data$IS_elevator > 0, 1, 0)
+```
+
+Now we can use Is_elevator column to build logistic regression model:
+
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ . - IS_elevator, 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+Z racji na niezbierzność modelu podczas budowy modelu ze wszystkimi zmiennymi, proces selekcji został przeprowadzony ręcznie zgodnie z przypuszczeniami autora co do przydatnosci i istotności danych zmiennych w modelu.
+
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + Floor + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement., 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+Model został zbudowany po 11 iteracjach.
+
+Zmienna YearBuilt jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna SalePrice jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna Floor jest nie istotna - można ją wykluczyć z modelu.
+
+Zmienna N_APT jest istona. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_SchoolNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodani a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_FacilitiesNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_Parkinglot.Ground. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_Parkinglot.Basement. jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Analiza dewiancji modelu pokazuje, że model znacząco różni się od modelu zerowego co jest porządanym rezultatem. Pdobne wnioski można wyciagnąć z porówania wyniku kryterium AIC z modelem zerowym.
+
+Model bez zmiennej Floor:
+
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement., 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+Po usunięciu zmiennej Krytermiu AIC oraz dewiancja podobna choć nieznacznie większa.
+
+Dodanie zmiennych do modelu:
+
+```{r}
+dir_logistic <- list()
+dir_logistic$fit <- glm(IS_elevator ~ YearBuilt + SalePrice + N_APT + N_SchoolNearBy.Total. + N_FacilitiesNearBy.Total. + N_Parkinglot.Ground. +  N_Parkinglot.Basement. + N_manager + AptManageType, 
+                   family = binomial, data = Data)
+summary(dir_logistic$fit)
+```
+
+Końcowo metodą prób i błędów udało się uzyskać model lepszy od poprzeniego (niższa wartość kryterium AIC oraz niższa wartość dewiancji)
+
+Analiza wyników:
+
+Zmienna YearBuilt jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna SalePrice jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_APT jest istona. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmiejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_SchoolNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodani a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_FacilitiesNearBy.Total. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_Parkinglot.Ground. jest istotna. Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_Parkinglot.Basement. jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna N_manager jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest ujemny a więc zmniejsza prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Zmienna AptManageTypeself_management jest istotna.Niska wartość satystyki p daje nam wysoką grarancje, że współczynik jest różny od zera. Współczynnik jest dodatni a więc zwiększa prawdopodobieństwo istnienia windy w budynku w którym znajduje się mieszkanie.
+
+Modele addytywne GAM:
+
+```{r}
+library(gam)
+```
+
+```{r}
+fit_gam_bf <- gam(IS_elevator ~ s(YearBuilt, df = 5) + s(SalePrice, df = 5) + s(N_APT, df = 5) + s(N_SchoolNearBy.Total., df = 5) + 
+    s(N_FacilitiesNearBy.Total., df = 5) + s(N_Parkinglot.Ground., df = 5) + s(N_Parkinglot.Basement., df = 5) + 
+    s(N_manager, df = 5) + AptManageType, family = binomial(), data = Data)
+summary(fit_gam_bf)
+```
+
+Znacznie lepsze wyniki od standarodwego modelu regresji logistycznej Dewiancja równa 0 i kryterium informayjnce AIC 83
+
+```{r}
+par(mfrow = c(1, 3))
+plot(fit_gam_bf, col = "red", se = TRUE)
+```
+
+```{r}
+library(tree)
+
+```
+
+Zamiana na dane kategoryczne:
+
+```{r}
+Data$IS_elevator <- factor(Data$IS_elevator, levels = c(0, 1), labels = c("No", "Yes"))
+```
+
+```{r}
+categorical_vars <- c("HallwayType", "HeatingType", "AptManageType", "SubwayStation","TimeToBusStop","TimeToSubway")
+
+
+dummy_data <- model.matrix(~., data = Data[, categorical_vars])
+
+
+preprocessed_data <- cbind(Data[, -which(names(Data) %in% categorical_vars)], dummy_data)
+
+
+print(preprocessed_data)
+```
+
+formuła
+
+```{r}
+add_backticks = function(x) {
+    paste0("`", x, "`")
+}
+
+x_lm_formula = function(x) {
+    paste(add_backticks(x), collapse = " + ")
+}
+
+build_lm_formula = function(x, y){
+    if (length(y)>1){
+        stop("y jest różne od 1")
+    }
+    as.formula(        
+        paste0("`",y,"`", " ~ ", x_lm_formula(x))
+    )
+}
+
+
+get_lm_formula <- function(data) {
+  columns <- colnames(data)
+  
+  y_cols <- columns[1]
+  x_cols <- columns[2:length(columns)]
+  
+  formula <- build_lm_formula(x_cols, y_cols)
+  
+  return(formula)
+}
+
+
+
+formula <- get_lm_formula(preprocessed_data)
+formula
+
+```
+
+```{r}
+# Split the data into training and testing sets
+set.seed(123)
+train_index <- sample(nrow(preprocessed_data), 0.7 * nrow(preprocessed_data))
+train_data <- preprocessed_data[train_index, ]
+test_data <- preprocessed_data[-train_index, ]
+```
+
+Drzewo decyzyjne:
+
+```{r}
+IS_elevator_tree <- tree(IS_elevator ~ YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data)
+summary(IS_elevator_tree)
+```
+
+```{r}
+plot(IS_elevator_tree)
+text(IS_elevator_tree, pretty = 0)
+```
+
+```{r}
+print(IS_elevator_tree)
+```
+
+```{r}
+library(tree)
+predictions <- predict(IS_elevator_tree, test_data, type = "class")
+confusionMatrix(predictions, test_data$IS_elevator)
+```
+
+Uzyskany model drzewa decyzyjnego użył do budowy drzewa tylko następujące zmienne:"N_SchoolNearBy.Middle.", "N_manager", N_Parkinglot.Ground.". I są to zmienne które są najbardziej istotne w klasyfikacji tego czy winda istnieje w budynku. Uzyskane wyniki wskazują na idelane dopasowanie do danych, i bezbłędne rozpoznanie wszystkich klas w zbiorze testowym. Wynik ten jednak wydaje się być niemożliwym do uzyskania w rzeczywistiści. Upatrujemy przyczyne w zbiorze danych i być może zbyt małej ilości rekorów danych, rónież nie równym podziale w kategorii jest/nie ma windy.
+
+Las losowy:
+
+```{r}
+install.packages("randomForest") # Install the package
+library(randomForest) # Load the package
+```
+```{r}
+library(caret)
+```
+
+
+```{r}
+# Train the random forest model
+rf_model <- randomForest(IS_elevator ~  YearBuilt + YrSold + MonthSold + Size.sqf. + Floor 
+                      +N_Parkinglot.Ground. + N_Parkinglot.Basement. + N_APT+ N_manager  + N_FacilitiesNearBy.PublicOffice. + N_FacilitiesNearBy.Hospital. + N_FacilitiesNearBy.Dpartmentstore. + N_FacilitiesNearBy.Mall. + N_FacilitiesNearBy.ETC. + N_FacilitiesNearBy.Park. + N_SchoolNearBy.Elementary. + N_SchoolNearBy.Middle. + N_SchoolNearBy.High. + N_SchoolNearBy.University. + N_FacilitiesInApt + N_FacilitiesNearBy.Total. + N_SchoolNearBy.Total. + HallwayTypemixed + HallwayTypeterraced + HeatingTypeindividual_heating + AptManageTypeself_management + SubwayStationBanwoldang + SubwayStationDaegu + SubwayStationKyungbuk_uni_hospital +  SubwayStationno_subway_nearby, data = train_data, ntree = 50, mtry = 6)
+```
+
+```{r}
+# Plot the error vs the number of trees graph
+plot(rf_model)
+```
+
+```{r}
+predictions <- predict(rf_model, test_data, type = "class")
+
+# Ocenianie dopasowania modelu
+confusion_matrix <- confusionMatrix(predictions, test_data$IS_elevator)
+accuracy <- confusion_matrix$overall['Accuracy']
+precision <- confusion_matrix$byClass['Precision']
+recall <- confusion_matrix$byClass['Recall']
+specificity <- confusion_matrix$byClass['Specificity']
+f1_score <- confusion_matrix$byClass['F1']
+
+# Wyświetlenie wyników
+print(confusion_matrix)
+cat(paste0("Accuracy: ", accuracy, "\n"))
+cat(paste0("Precision: ", precision, "\n"))
+cat(paste0("Recall: ", recall, "\n"))
+cat(paste0("Specificity: ", specificity, "\n"))
+cat(paste0("F1 Score: ", f1_score, "\n"))
+```
+
+Wyniki lasu losowego są takie podobne do pojedynczego drzewa. Idelane dopasowanie do danych, poprawne przewidzenie wszystkich przykłądów. Jak zostało wspomniane wcześniej, wynik taki wydaje się być zbyt idelany, uaptrujemy winy w danych, (zbyt mała ilość danych, zbyt duża dysproporcja w klasie (ilość) yes/no)
